@@ -1,0 +1,222 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Brands {
+  id         Int        @id @default(autoincrement())
+  brandName  String     @unique @db.VarChar(70)
+  brandImage String     @db.VarChar(255)
+  products   Products[]
+  createdAt  DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime   @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model Categories {
+  id            Int        @id @default(autoincrement())
+  categoryName  String     @unique @db.VarChar(70)
+  categoryImage String     @db.VarChar(255)
+  products      Products[]
+  createdAt     DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime   @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model Products {
+  id               Int                @id @default(autoincrement())
+  shortDescription String             @db.VarChar(255)
+  price            Float
+  discount         Boolean
+  discountPrice    Float
+  productImage     String             @db.VarChar(255)
+  stock            Boolean
+  star             Float
+  remark           products_remarks
+  categoryId       Int              
+  category         Categories         @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  brandId          Int              
+  brand            Brands             @relation(fields: [brandId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  productsDetails  ProductsDetails?
+  productSliders   ProductSliders?
+  productCarts     ProductCarts[]
+  productWishlist  ProductWishlist[]
+  productReviews   ProductReviews[]
+  invoiceProducts  InvoicesProducts[]
+  createdAt        DateTime           @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime           @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model ProductsDetails {
+  id          Int      @id @default(autoincrement())
+  img1        String   @db.VarChar(255)
+  img2        String   @db.VarChar(255)
+  img3        String   @db.VarChar(255)
+  img4        String   @db.VarChar(255)
+  img5        String   @db.VarChar(255)
+  img6        String   @db.VarChar(255)
+  img7        String   @db.VarChar(255)
+  img8        String   @db.VarChar(255)
+  description String   @db.LongText
+  color       String   @db.VarChar(70)
+  size        String   @db.VarChar(70)
+  productId   Int      @unique
+  product     Products @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model ProductSliders {
+  id               Int      @id @default(autoincrement())
+  title            String   @db.VarChar(70)
+  shortDescription String   @db.VarChar(255)
+  price            Float
+  images           String   @db.VarChar(255)
+  productWishlist  ProductWishlist[]
+  invoices         Invoices[]
+  invoicesProducts InvoicesProducts[]
+  createdAt        DateTime           @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime           @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model CustomersProfile {
+  id               Int              @id @default(autoincrement())
+  customername     String           @db.VarChar(70)
+  customeraddress  String           @db.VarChar(70)
+  customercity     String           @db.VarChar(100)
+  customerstate    String           @db.VarChar(100)
+  customerpostcode String           @db.VarChar(100)
+  customercountry  String           @db.VarChar(100)
+  customerphone    String           @db.VarChar(100)
+  customerfax      String           @db.VarChar(100)
+  shippingname     String           @db.VarChar(70)
+  shippingaddress  String           @db.VarChar(70)
+  shippingcity     String           @db.VarChar(100)
+  shippingstate    String           @db.VarChar(100)
+  shippingpostcode String           @db.VarChar(100)
+  shippingcountry  String           @db.VarChar(100)
+  shippingphone    String           @db.VarChar(100)
+  userId           Int              @unique
+  user                         @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  productReviews   ProductReviews[]
+  createdAt        DateTime         @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime         @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model ProductCarts {
+  id        Int      @id @default(autoincrement())
+  color     String   @db.VarChar(70)
+  size      String   @db.VarChar(70)
+  quantity  Float
+  price     Float
+  productId Int      
+  product   Products @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId    Int      
+  // user      Users    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model ProductWishlist {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Products @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId    Int
+  // user      Users    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model ProductReviews {
+  id          Int              @id @default(autoincrement())
+  description String           @db.VarChar(255)
+  rating      String           @db.VarChar(70)
+  productId   Int
+  product     Products         @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  customerId  Int
+  customer    CustomersProfile @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+}
+
+model Invoices {
+  id               Int                @id @default(autoincrement())
+  total            Float
+  vat              Float
+  payable          Float
+  customerdetails  String             @db.VarChar(255)
+  shippingaddress  String             @db.VarChar(255)
+  transactionid    String             @db.VarChar(255)
+  validity         String             @default("0") @db.VarChar(255)
+  deliverystatus   invoice_delivery_status
+  paymentstatus    String             @db.VarChar(255)
+  userId           Int
+  // user             Users              @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  invoicesProducts InvoicesProducts[]
+  createdAt        DateTime           @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime           @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model InvoicesProducts {
+  id        Int      @id @default(autoincrement())
+  invoiceId Int      
+  invoice   Invoices @relation(fields: [invoiceId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  productId Int      
+  product   Products @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId    Int     
+  // user      Users    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  quantity  Float
+  saleprice Float
+  color     String   @db.VarChar(70)
+  size      String   @db.VarChar(70)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model policiy {
+  id          Int            @id @default(autoincrement())
+  type        policiyes_type
+  description String         @db.LongText
+}
+
+model sslcommerce {
+  id         Int      @id @default(autoincrement())
+  storeid    String   @db.VarChar(255)
+  storepass  String   @db.VarChar(255)
+  currency   String   @db.VarChar(255)
+  successurl String   @db.VarChar(255)
+  failurl    String   @db.VarChar(255)
+  cancelurl  String   @db.VarChar(255)
+  ipnurl     String   @db.VarChar(255)
+  initurl    String   @db.VarChar(255)
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+
+// enum type of data is here.....
+enum policiyes_type {
+  about
+  refund
+  terms
+  contact
+  complain
+}
+
+enum invoice_delivery_status {
+  Pending
+  Processing
+  Completed
+}
+
+enum products_remarks {
+  popular
+  new
+  top
+  special
+  trending
+  regular
+}
